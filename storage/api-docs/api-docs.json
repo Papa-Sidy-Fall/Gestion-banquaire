@@ -1,0 +1,267 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+        "title": "API Banque",
+        "description": "API pour la gestion des comptes bancaires",
+        "version": "1.0.0"
+    },
+    "servers": [
+        {
+            "url": "http://api.banque.example.com/api/v1",
+            "description": "Serveur API"
+        }
+    ],
+    "paths": {
+        "/comptes": {
+            "get": {
+                "tags": [
+                    "Comptes"
+                ],
+                "summary": "Lister tous les comptes",
+                "description": "Admin peut récupérer la liste de tous les comptes, Client peut récupérer la liste de ses comptes. Liste des comptes non supprimés, type cheque ou epargne, actifs.",
+                "operationId": "5fdb1d9d6a1e1d81e65a694d33a249c6",
+                "parameters": [
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "description": "Numéro de page",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "default": 1
+                        }
+                    },
+                    {
+                        "name": "limit",
+                        "in": "query",
+                        "description": "Nombre d'éléments par page",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "default": 10,
+                            "maximum": 100
+                        }
+                    },
+                    {
+                        "name": "type",
+                        "in": "query",
+                        "description": "Filtrer par type",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "epargne",
+                                "cheque"
+                            ]
+                        }
+                    },
+                    {
+                        "name": "statut",
+                        "in": "query",
+                        "description": "Filtrer par statut",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "actif",
+                                "bloque",
+                                "ferme"
+                            ]
+                        }
+                    },
+                    {
+                        "name": "search",
+                        "in": "query",
+                        "description": "Recherche par titulaire ou numéro",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "sort",
+                        "in": "query",
+                        "description": "Champ de tri",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "default": "created_at"
+                        }
+                    },
+                    {
+                        "name": "order",
+                        "in": "query",
+                        "description": "Ordre de tri",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "default": "desc",
+                            "enum": [
+                                "asc",
+                                "desc"
+                            ]
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Liste des comptes",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/Compte"
+                                            }
+                                        },
+                                        "pagination": {
+                                            "$ref": "#/components/schemas/Pagination"
+                                        },
+                                        "links": {
+                                            "$ref": "#/components/schemas/Links"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Non authentifié"
+                    }
+                },
+                "security": [
+                    {
+                        "passport": []
+                    }
+                ]
+            }
+        }
+    },
+    "components": {
+        "schemas": {
+            "Compte": {
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "example": "550e8400-e29b-41d4-a716-446655440000"
+                    },
+                    "numeroCompte": {
+                        "type": "string",
+                        "example": "C00123456"
+                    },
+                    "titulaire": {
+                        "type": "string",
+                        "example": "Amadou Diallo"
+                    },
+                    "type": {
+                        "type": "string",
+                        "example": "epargne"
+                    },
+                    "solde": {
+                        "type": "number",
+                        "example": 1250000
+                    },
+                    "devise": {
+                        "type": "string",
+                        "example": "FCFA"
+                    },
+                    "dateCreation": {
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2023-03-15T00:00:00Z"
+                    },
+                    "statut": {
+                        "type": "string",
+                        "example": "bloque"
+                    },
+                    "motifBlocage": {
+                        "type": "string",
+                        "example": "Inactivité de 30+ jours"
+                    },
+                    "metadata": {
+                        "properties": {
+                            "derniereModification": {
+                                "type": "string",
+                                "format": "date-time"
+                            },
+                            "version": {
+                                "type": "integer",
+                                "example": 1
+                            }
+                        },
+                        "type": "object"
+                    }
+                },
+                "type": "object"
+            },
+            "Pagination": {
+                "properties": {
+                    "currentPage": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "totalPages": {
+                        "type": "integer",
+                        "example": 3
+                    },
+                    "totalItems": {
+                        "type": "integer",
+                        "example": 25
+                    },
+                    "itemsPerPage": {
+                        "type": "integer",
+                        "example": 10
+                    },
+                    "hasNext": {
+                        "type": "boolean",
+                        "example": true
+                    },
+                    "hasPrevious": {
+                        "type": "boolean",
+                        "example": false
+                    }
+                },
+                "type": "object"
+            },
+            "Links": {
+                "properties": {
+                    "self": {
+                        "type": "string",
+                        "example": "/api/v1/comptes?page=1&limit=10"
+                    },
+                    "next": {
+                        "type": "string",
+                        "example": "/api/v1/comptes?page=2&limit=10"
+                    },
+                    "first": {
+                        "type": "string",
+                        "example": "/api/v1/comptes?page=1&limit=10"
+                    },
+                    "last": {
+                        "type": "string",
+                        "example": "/api/v1/comptes?page=3&limit=10"
+                    }
+                },
+                "type": "object"
+            }
+        }
+    },
+    "tags": [
+        {
+            "name": "Comptes",
+            "description": "Comptes"
+        }
+    ],
+    "security": [
+        {
+            "passport": []
+        }
+    ]
+}
