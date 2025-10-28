@@ -17,7 +17,7 @@ use Illuminate\Pagination\LengthAwarePaginator;
  * )
  *
  * @OA\Server(
- *     url="http://api.banque.example.com/api/v1",
+ *     url="http://localhost:8000/api/v1",
  *     description="Serveur API"
  * )
  *
@@ -65,7 +65,6 @@ class CompteController extends Controller
      *     summary="Lister tous les comptes",
      *     description="Admin peut récupérer la liste de tous les comptes, Client peut récupérer la liste de ses comptes. Liste des comptes non supprimés, type cheque ou epargne, actifs.",
      *     tags={"Comptes"},
-     *     security={{"passport":{}}},
      *     @OA\Parameter(
      *         name="page",
      *         in="query",
@@ -124,10 +123,6 @@ class CompteController extends Controller
      *             @OA\Property(property="pagination", ref="#/components/schemas/Pagination"),
      *             @OA\Property(property="links", ref="#/components/schemas/Links")
      *         )
-     *     ),
-     *     @OA\Response(
-     *         response=401,
-     *         description="Non authentifié"
      *     )
      * )
      */
@@ -169,23 +164,229 @@ class CompteController extends Controller
         return $this->paginatedResponse($paginator, CompteResource::class);
     }
 
+    /**
+     * @OA\Post(
+     *     path="/comptes",
+     *     summary="Créer un nouveau compte",
+     *     description="Créer un nouveau compte bancaire avec validation des données",
+     *     tags={"Comptes"},
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             required={"client_id", "type_compte"},
+     *             @OA\Property(property="client_id", type="string", format="uuid", example="550e8400-e29b-41d4-a716-446655440000"),
+     *             @OA\Property(property="type_compte", type="string", enum={"epargne", "cheque"}, example="epargne"),
+     *             @OA\Property(property="solde", type="number", example=0),
+     *             @OA\Property(property="devise", type="string", example="FCFA"),
+     *             @OA\Property(property="statut", type="string", enum={"actif", "bloque", "ferme"}, example="actif")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=201,
+     *         description="Compte créé avec succès",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=true),
+     *             @OA\Property(property="message", type="string", example="Compte créé avec succès"),
+     *             @OA\Property(property="data", ref="#/components/schemas/Compte")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=422,
+     *         description="Erreur de validation"
+     *     )
+     * )
+     */
+    /**
+     * @OA\Put(
+     *     path="/comptes/{compteId}",
+     *     summary="Modifier un compte",
+     *     description="Modifier les informations d'un compte bancaire existant",
+     *     tags={"Comptes"},
+     *     @OA\Parameter(
+     *         name="compteId",
+     *         in="path",
+     *         description="ID du compte à modifier",
+     *         required=true,
+     *         @OA\Schema(type="string", format="uuid")
+     *     ),
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             @OA\Property(property="type_compte", type="string", enum={"epargne", "cheque"}, example="epargne"),
+     *             @OA\Property(property="solde", type="number", example=150000),
+     *             @OA\Property(property="devise", type="string", example="FCFA"),
+     *             @OA\Property(property="statut", type="string", enum={"actif", "bloque", "ferme"}, example="actif"),
+     *             @OA\Property(property="motifBlocage", type="string", example="Raison du blocage")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Compte modifié avec succès",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=true),
+     *             @OA\Property(property="message", type="string", example="Compte modifié avec succès"),
+     *             @OA\Property(property="data", ref="#/components/schemas/Compte")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="Compte non trouvé"
+     *     )
+     * )
+     */
+    public function update(Request $request, Compte $compte)
+    {
+        $user = $request->user();
+        $isAdmin = $user && $user->role === 'admin';
+
+        // Vérifier les permissions
+        if (!$isAdmin && $user) {
+            // Client ne peut modifier que ses propres comptes
+            if (!$compte->client || $compte->client->telephone !== $user->telephone) {
+                return $this->errorResponse('Accès refusé à ce compte', 403);
+            }
+        }
+
+        $validated = $request->validate([
+            'type_compte' => 'sometimes|in:epargne,cheque',
+            'solde' => 'sometimes|numeric|min:0',
+            'devise' => 'sometimes|string|max:10',
+            'statut' => 'sometimes|in:actif,bloque,ferme',
+            'motifBlocage' => 'nullable|string'
+        ]);
+
+        $compte->update($validated);
+        return $this->successResponse(new CompteResource($compte), 'Compte modifié avec succès');
+    }
+
     public function store(StoreCompteRequest $request)
     {
         $compte = Compte::create($request->validated());
-        return response()->json([
-            'message' => 'Compte créé avec succès',
-            'data' => $compte
-        ], 201);
+        return $this->successResponse(new CompteResource($compte), 'Compte créé avec succès', 201);
     }
 
-    public function show(Compte $compte)
+    /**
+     * @OA\Get(
+     *     path="/comptes/{compteId}",
+     *     summary="Afficher un compte spécifique",
+     *     description="Admin peut récupérer un compte par ID, Client peut récupérer un de ses comptes par ID. Recherche locale par défaut, serverless si non trouvé.",
+     *     tags={"Comptes"},
+     *     @OA\Parameter(
+     *         name="compteId",
+     *         in="path",
+     *         description="ID du compte",
+     *         required=true,
+     *         @OA\Schema(type="string", format="uuid")
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Détails du compte",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=true),
+     *             @OA\Property(property="data", ref="#/components/schemas/Compte")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="Compte non trouvé",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=false),
+     *             @OA\Property(property="error", type="object",
+     *                 @OA\Property(property="code", type="string", example="COMPTE_NOT_FOUND"),
+     *                 @OA\Property(property="message", type="string", example="Le compte avec l'ID spécifié n'existe pas"),
+     *                 @OA\Property(property="details", type="object", @OA\Property(property="compteId", type="string"))
+     *             )
+     *         )
+     *     )
+     * )
+     */
+    public function show(Request $request, $compteId)
     {
-        return response()->json($compte->load('client'));
+        // Validation de l'UUID
+        if (!\Illuminate\Support\Str::isUuid($compteId)) {
+            return response()->json([
+                'success' => false,
+                'error' => [
+                    'code' => 'COMPTE_NOT_FOUND',
+                    'message' => 'Le compte avec l\'ID spécifié n\'existe pas',
+                    'details' => [
+                        'compteId' => $compteId
+                    ]
+                ]
+            ], 404);
+        }
+
+        try {
+            $compte = Compte::with('client')->findOrFail($compteId);
+
+            $user = $request->user();
+            $isAdmin = $user && $user->role === 'admin';
+
+            // Vérifier les permissions
+            if (!$isAdmin && $user) {
+                // Client ne peut voir que ses propres comptes
+                if (!$compte->client || $compte->client->telephone !== $user->telephone) {
+                    return $this->errorResponse('Accès refusé à ce compte', 403);
+                }
+            }
+
+            return $this->successResponse(new CompteResource($compte));
+
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            return response()->json([
+                'success' => false,
+                'error' => [
+                    'code' => 'COMPTE_NOT_FOUND',
+                    'message' => 'Le compte avec l\'ID spécifié n\'existe pas',
+                    'details' => [
+                        'compteId' => $compteId
+                    ]
+                ]
+            ], 404);
+        }
     }
 
-    public function destroy(Compte $compte)
+    /**
+     * @OA\Delete(
+     *     path="/comptes/{compteId}",
+     *     summary="Supprimer un compte",
+     *     description="Supprimer un compte bancaire (soft delete)",
+     *     tags={"Comptes"},
+     *     @OA\Parameter(
+     *         name="compteId",
+     *         in="path",
+     *         description="ID du compte à supprimer",
+     *         required=true,
+     *         @OA\Schema(type="string", format="uuid")
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Compte supprimé avec succès",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=true),
+     *             @OA\Property(property="message", type="string", example="Compte supprimé avec succès")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="Compte non trouvé"
+     *     )
+     * )
+     */
+    public function destroy(Request $request, Compte $compte)
     {
+        $user = $request->user();
+        $isAdmin = $user && $user->role === 'admin';
+
+        // Vérifier les permissions
+        if (!$isAdmin && $user) {
+            // Client ne peut supprimer que ses propres comptes
+            if (!$compte->client || $compte->client->telephone !== $user->telephone) {
+                return $this->errorResponse('Accès refusé à ce compte', 403);
+            }
+        }
+
         $compte->delete();
-        return response()->json(['message' => 'Compte supprimé avec succès']);
+        return $this->successResponse(null, 'Compte supprimé avec succès');
     }
 }

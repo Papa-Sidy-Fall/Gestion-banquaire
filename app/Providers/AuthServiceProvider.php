@@ -7,8 +7,8 @@ use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvid
 // use Laravel\Passport\Passport;
 
 
+use Laravel\Passport\Passport;
 use Laravel\Passport\Http\Controllers\AccessTokenController;
-use Laravel\Passport\Http\Controllers\AuthorizationController;
 use Laravel\Passport\Http\Controllers\TransientTokenController;
 use Illuminate\Support\Facades\Route;
 
@@ -29,15 +29,12 @@ class AuthServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        
-          $this->registerPolicies();
+        $this->registerPolicies();
 
-    // Définir manuellement les routes de Passport
+        // Passport routes manuelles pour Laravel 10
         Route::prefix('oauth')->group(function () {
-        Route::post('/token', [AccessTokenController::class, 'issueToken'])->name('passport.token');
-        Route::get('/authorize', [AuthorizationController::class, 'authorize'])->name('passport.authorizations.authorize');
-        Route::post('/token/refresh', [TransientTokenController::class, 'refresh'])->name('passport.token.refresh');
-    });
-        
+            Route::post('/token', [AccessTokenController::class, 'issueToken']);
+            Route::post('/token/refresh', [TransientTokenController::class, 'refresh']);
+        });
     }
 }
