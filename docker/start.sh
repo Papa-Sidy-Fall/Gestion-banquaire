@@ -7,8 +7,16 @@ echo "🚀 Starting Laravel application..."
 
 # Create .env file if it doesn't exist
 if [ ! -f .env ]; then
-    echo "📄 Creating .env file..."
-    cp .env.example .env
+    echo "📄 Creating .env file from .env.example..."
+    cp .env.example .env || echo "Warning: .env.example not found, creating basic .env"
+
+    # Set production environment variables
+    echo "APP_ENV=production" >> .env
+    echo "APP_DEBUG=false" >> .env
+    echo "LOG_LEVEL=error" >> .env
+    echo "CACHE_STORE=database" >> .env
+    echo "SESSION_DRIVER=database" >> .env
+    echo "QUEUE_CONNECTION=database" >> .env
 fi
 
 # Wait for database to be ready
