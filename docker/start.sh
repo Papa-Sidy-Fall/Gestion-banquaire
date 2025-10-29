@@ -33,10 +33,12 @@ while [ $i -le 60 ]; do
     if [ -n "$DATABASE_URL" ]; then
         # Extract database connection details from DATABASE_URL
         # Format: postgresql://username:password@host:port/database
-        DB_HOST=$(echo $DATABASE_URL | sed -n 's|.*@\([^:]*\):.*|\1|p')
-        DB_PORT=$(echo $DATABASE_URL | sed -n 's|.*:\([0-9]*\)/.*|\1|p')
         DB_USERNAME=$(echo $DATABASE_URL | sed -n 's|.*://\([^:]*\):.*|\1|p')
         DB_PASSWORD=$(echo $DATABASE_URL | sed -n 's|.*:\([^@]*\)@.*|\1|p')
+        DB_HOST=$(echo $DATABASE_URL | sed -n 's|.*@\([^:]*\):.*|\1|p')
+        DB_PORT=$(echo $DATABASE_URL | sed -n 's|.*:\([0-9]*\)/.*|\1|p')
+
+        echo "Parsed values - User: $DB_USERNAME, Host: $DB_HOST, Port: $DB_PORT"
 
         if pg_isready -h $DB_HOST -p $DB_PORT -U $DB_USERNAME -d postgres >/dev/null 2>&1; then
             echo "✅ Database is ready!"
@@ -51,6 +53,7 @@ while [ $i -le 60 ]; do
     if [ $i -gt 60 ]; then
         echo "❌ Database connection timeout after 120 seconds"
         echo "Final DATABASE_URL: $DATABASE_URL"
+        echo "Parsed - User: $DB_USERNAME, Host: $DB_HOST, Port: $DB_PORT"
         exit 1
     fi
 done
