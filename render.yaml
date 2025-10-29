@@ -1,4 +1,20 @@
 services:
+  - type: pserv
+    name: postgres
+    runtime: docker
+    dockerfilePath: ./docker/postgres.Dockerfile
+    envVars:
+      - key: POSTGRES_DB
+        value: laravel
+      - key: POSTGRES_USER
+        value: laravel
+      - key: POSTGRES_PASSWORD
+        generateValue: true
+    disk:
+      name: postgres-data
+      mountPath: /var/lib/postgresql/data
+      sizeGB: 10
+
   - type: web
     name: laravel-api
     runtime: docker
@@ -17,22 +33,6 @@ services:
           type: pserv
           name: postgres
           property: connectionString
-    # Database (PostgreSQL)
-  - type: pserv
-    name: postgres
-    runtime: docker
-    dockerfilePath: ./docker/postgres.Dockerfile
-    envVars:
-      - key: POSTGRES_DB
-        value: laravel
-      - key: POSTGRES_USER
-        value: laravel
-      - key: POSTGRES_PASSWORD
-        generateValue: true
-    disk:
-      name: postgres-data
-      mountPath: /var/lib/postgresql/data
-      sizeGB: 10
 
 # Environment groups for different stages
 environments:
