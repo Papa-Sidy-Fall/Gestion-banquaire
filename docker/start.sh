@@ -5,16 +5,23 @@ set -e
 
 echo "🚀 Starting Laravel application..."
 
+# Create .env file if it doesn't exist
+if [ ! -f .env ]; then
+    echo "📄 Creating .env file..."
+    cp .env.example .env
+fi
+
 # Wait for database to be ready
 echo "⏳ Waiting for database..."
 echo "Environment variables:"
-echo "DATABASE_URL: ${DATABASE_URL:0:30}..."
+echo "DATABASE_URL: ${DATABASE_URL:0:50}..."
 echo "DB_HOST: $DB_HOST"
 echo "DB_PORT: $DB_PORT"
 echo "DB_USERNAME: $DB_USERNAME"
 
 # Try to connect for max 120 seconds (longer timeout)
-for i in {1..60}; do
+i=1
+while [ $i -le 60 ]; do
     if [ -n "$DATABASE_URL" ]; then
         # Extract database connection details from DATABASE_URL
         # Format: postgresql://username:password@host:port/database
@@ -31,8 +38,9 @@ for i in {1..60}; do
 
     echo "Database not ready, attempt $i/60, waiting..."
     sleep 2
+    i=$((i + 1))
 
-    if [ $i -eq 60 ]; then
+    if [ $i -gt 60 ]; then
         echo "❌ Database connection timeout after 120 seconds"
         echo "Final DATABASE_URL: $DATABASE_URL"
         exit 1
