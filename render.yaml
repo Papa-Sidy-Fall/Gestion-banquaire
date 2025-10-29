@@ -12,6 +12,11 @@ services:
         value: false
       - key: APP_KEY
         generateValue: true
+      - key: DATABASE_URL
+        fromService:
+          type: pserv
+          name: postgres
+          property: connectionString
     # Database (PostgreSQL)
   - type: pserv
     name: postgres
