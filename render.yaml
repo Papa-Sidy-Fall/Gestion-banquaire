@@ -46,5 +46,5 @@ environments:
   - name: production
     source:
       type: git
-      repo: your-repo-url
-      branch: main
+      repo: https://github.com/Papa-Sidy-Fall/Gestion-banquaire.git
+      branch: dev/v1.0.0
