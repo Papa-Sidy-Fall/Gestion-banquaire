@@ -19,10 +19,10 @@ RUN apk add --no-cache \
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
 # Créer l'utilisateur www-data et les répertoires nécessaires
-RUN addgroup -g 1000 -S www-data && \
-    adduser -u 1000 -S www-data -G www-data && \
+RUN addgroup -g 1000 -S www-data || true && \
+    adduser -u 1000 -S www-data -G www-data || true && \
     mkdir -p /var/log/supervisor /var/cache/nginx /run/nginx && \
-    chown -R www-data:www-data /var/log/supervisor /var/cache/nginx /run/nginx
+    chown -R www-data:www-data /var/log/supervisor /var/cache/nginx /run/nginx || true
 
 # Définir le répertoire de travail
 WORKDIR /var/www/html
