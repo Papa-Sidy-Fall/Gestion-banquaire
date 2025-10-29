@@ -32,22 +32,16 @@ i=1
 while [ $i -le 60 ]; do
     if [ -n "$DATABASE_URL" ]; then
         # Extract database connection details from DATABASE_URL
-        # Format: postgresql://username:password@host:port/database
+        # Format: postgresql://username:password@host/database (no port in Render URLs)
         DB_USERNAME=$(echo $DATABASE_URL | sed -n 's|.*://\([^:]*\):.*|\1|p')
         DB_PASSWORD=$(echo $DATABASE_URL | sed -n 's|.*:\([^@]*\)@.*|\1|p')
-        DB_HOST=$(echo $DATABASE_URL | sed -n 's|.*@\([^:]*\):.*|\1|p')
-        DB_PORT=$(echo $DATABASE_URL | sed -n 's|.*:\([0-9]*\)/.*|\1|p')
+        DB_HOST=$(echo $DATABASE_URL | sed -n 's|.*@\([^/]*\)/.*|\1|p')
+        DB_PORT="5432"  # Always use 5432 for PostgreSQL
 
         # Debug: Show what we extracted
         echo "Raw URL parsing:"
         echo "  URL: $DATABASE_URL"
         echo "  Extracted - User: '$DB_USERNAME', Password: '${DB_PASSWORD:0:5}...', Host: '$DB_HOST', Port: '$DB_PORT'"
-
-        # Fallback for port if not found (PostgreSQL default)
-        if [ -z "$DB_PORT" ]; then
-            DB_PORT="5432"
-            echo "  Using default port: $DB_PORT"
-        fi
 
         echo "Parsed values - User: $DB_USERNAME, Host: $DB_HOST, Port: $DB_PORT"
 
