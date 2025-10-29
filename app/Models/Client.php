@@ -20,6 +20,9 @@ class Client extends Model
         'email',
         'telephone',
         'adresse',
+        'password',
+        'code_verification',
+        'code_expires_at',
     ];
 
     protected static function boot()

@@ -22,15 +22,24 @@ Route::prefix('v1')->group(function () {
         Route::get('comptes', [CompteController::class, 'index'])->name('comptes.index');
 
         // Créer un compte
-        Route::post('comptes', [CompteController::class, 'store'])->name('comptes.store');
+        Route::post('comptes', [CompteController::class, 'store'])
+            ->middleware('logging:CREATION_COMPTE')
+            ->name('comptes.store');
 
         // Afficher un compte spécifique
         Route::get('comptes/{compte}', [CompteController::class, 'show'])->name('comptes.show');
 
         // Modifier un compte
-        Route::put('comptes/{compte}', [CompteController::class, 'update'])->name('comptes.update');
+        Route::patch('comptes/{compte}', [CompteController::class, 'update'])
+            ->middleware('logging:MODIFICATION_COMPTE')
+            ->name('comptes.update');
 
         // Supprimer un compte (soft delete)
         Route::delete('comptes/{compte}', [CompteController::class, 'destroy'])->name('comptes.destroy');
+
+        // Bloquer un compte
+        Route::post('comptes/{compte}/bloquer', [CompteController::class, 'bloquer'])
+            ->middleware('logging:BLOCAGE_COMPTE')
+            ->name('comptes.bloquer');
     });
 });

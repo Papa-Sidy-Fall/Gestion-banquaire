@@ -23,6 +23,10 @@ class Compte extends Model
         'devise',
         'statut',
         'motifBlocage',
+        'date_debut_blocage',
+        'date_fin_blocage',
+        'est_archive',
+        'date_archivage',
     ];
 
     protected static function boot()
@@ -89,13 +93,30 @@ class Compte extends Model
     {
         return $query->where('numero', $numero);
     }
+// Scope pour récupérer les comptes d'un client par téléphone
+public function scopeClient($query, $telephone)
+{
+    return $query->whereHas('client', function ($clientQuery) use ($telephone) {
+        $clientQuery->where('telephone', $telephone);
+    });
+}
 
-    // Scope pour récupérer les comptes d'un client par téléphone
-    public function scopeClient($query, $telephone)
-    {
-        return $query->whereHas('client', function ($clientQuery) use ($telephone) {
-            $clientQuery->where('telephone', $telephone);
-        });
-    }
+// Accessor pour le solde calculé (Somme dépôts - Somme retraits)
+public function getSoldeCalculeAttribute()
+{
+    $depots = $this->transactions()->where('type', 'depot')->sum('montant');
+    $retraits = $this->transactions()->where('type', 'retrait')->sum('montant');
+
+    return $depots - $retraits;
+}
+
+// Accessor pour obtenir le solde réel (stocké ou calculé)
+public function getSoldeReelAttribute()
+{
+    // Si le solde est stocké en base, on le retourne
+    // Sinon on calcule à partir des transactions
+    return $this->solde ?? $this->solde_calcule;
+}
+
 
 }

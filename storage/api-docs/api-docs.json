@@ -214,95 +214,6 @@
                     }
                 }
             },
-            "put": {
-                "tags": [
-                    "Comptes"
-                ],
-                "summary": "Modifier un compte",
-                "description": "Modifier les informations d'un compte bancaire existant",
-                "operationId": "03d15875d7640e630f1a4d1f3352945e",
-                "parameters": [
-                    {
-                        "name": "compteId",
-                        "in": "path",
-                        "description": "ID du compte à modifier",
-                        "required": true,
-                        "schema": {
-                            "type": "string",
-                            "format": "uuid"
-                        }
-                    }
-                ],
-                "requestBody": {
-                    "required": true,
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "properties": {
-                                    "type_compte": {
-                                        "type": "string",
-                                        "enum": [
-                                            "epargne",
-                                            "cheque"
-                                        ],
-                                        "example": "epargne"
-                                    },
-                                    "solde": {
-                                        "type": "number",
-                                        "example": 150000
-                                    },
-                                    "devise": {
-                                        "type": "string",
-                                        "example": "FCFA"
-                                    },
-                                    "statut": {
-                                        "type": "string",
-                                        "enum": [
-                                            "actif",
-                                            "bloque",
-                                            "ferme"
-                                        ],
-                                        "example": "actif"
-                                    },
-                                    "motifBlocage": {
-                                        "type": "string",
-                                        "example": "Raison du blocage"
-                                    }
-                                },
-                                "type": "object"
-                            }
-                        }
-                    }
-                },
-                "responses": {
-                    "200": {
-                        "description": "Compte modifié avec succès",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "success": {
-                                            "type": "boolean",
-                                            "example": true
-                                        },
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Compte modifié avec succès"
-                                        },
-                                        "data": {
-                                            "$ref": "#/components/schemas/Compte"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "404": {
-                        "description": "Compte non trouvé"
-                    }
-                }
-            },
             "delete": {
                 "tags": [
                     "Comptes"
@@ -345,6 +256,242 @@
                     },
                     "404": {
                         "description": "Compte non trouvé"
+                    }
+                }
+            },
+            "patch": {
+                "tags": [
+                    "Comptes"
+                ],
+                "summary": "Mettre à jour les informations du client",
+                "description": "Mettre à jour les informations du client. Tous les champs sont optionnels mais au moins un champ doit être fourni.",
+                "operationId": "8a0490f7c7dafbd8af84822d5f07620c",
+                "parameters": [
+                    {
+                        "name": "compteId",
+                        "in": "path",
+                        "description": "ID du compte",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "titulaire": {
+                                        "type": "string",
+                                        "example": "Amadou Diallo Junior"
+                                    },
+                                    "type": {
+                                        "type": "string",
+                                        "enum": [
+                                            "cheque",
+                                            "epargne"
+                                        ],
+                                        "example": "epargne"
+                                    },
+                                    "solde": {
+                                        "type": "number",
+                                        "example": 1500000
+                                    },
+                                    "devise": {
+                                        "type": "string",
+                                        "enum": [
+                                            "FCFA",
+                                            "EUR",
+                                            "USD"
+                                        ],
+                                        "example": "FCFA"
+                                    },
+                                    "statut": {
+                                        "type": "string",
+                                        "enum": [
+                                            "actif",
+                                            "bloque",
+                                            "ferme"
+                                        ],
+                                        "example": "actif"
+                                    },
+                                    "motifBlocage": {
+                                        "type": "string",
+                                        "example": "Raison du blocage"
+                                    },
+                                    "informationsClient": {
+                                        "properties": {
+                                            "telephone": {
+                                                "type": "string",
+                                                "example": "+221771234568"
+                                            },
+                                            "email": {
+                                                "type": "string",
+                                                "format": "email",
+                                                "example": "nouveau@email.com"
+                                            },
+                                            "password": {
+                                                "type": "string",
+                                                "example": "nouveauMotDePasse"
+                                            },
+                                            "nci": {
+                                                "type": "string",
+                                                "example": "1234567890124"
+                                            },
+                                            "adresse": {
+                                                "type": "string",
+                                                "example": "Nouvelle adresse"
+                                            }
+                                        },
+                                        "type": "object"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Informations mises à jour avec succès",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Compte mis à jour avec succès"
+                                        },
+                                        "data": {
+                                            "$ref": "#/components/schemas/Compte"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Erreur de validation - Aucun champ fourni",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Au moins un champ doit être fourni pour la mise à jour."
+                                        },
+                                        "errors": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Accès refusé"
+                    },
+                    "404": {
+                        "description": "Compte non trouvé"
+                    },
+                    "422": {
+                        "description": "Erreur de validation des données"
+                    }
+                }
+            }
+        },
+        "/comptes/{compteId}/bloquer": {
+            "post": {
+                "tags": [
+                    "Comptes"
+                ],
+                "summary": "Bloquer un compte",
+                "description": "Bloquer un compte bancaire pour une durée déterminée avec archivage automatique",
+                "operationId": "390ba31a4e446e503570b3c8373a5c2a",
+                "parameters": [
+                    {
+                        "name": "compteId",
+                        "in": "path",
+                        "description": "ID du compte à bloquer",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "motifBlocage",
+                                    "dureeBlocage"
+                                ],
+                                "properties": {
+                                    "motifBlocage": {
+                                        "type": "string",
+                                        "example": "Inactivité de 30+ jours"
+                                    },
+                                    "dureeBlocage": {
+                                        "description": "Durée en jours",
+                                        "type": "integer",
+                                        "maximum": 365,
+                                        "minimum": 1,
+                                        "example": 30
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Compte bloqué avec succès",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Compte bloqué avec succès"
+                                        },
+                                        "data": {
+                                            "$ref": "#/components/schemas/Compte"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Accès refusé"
+                    },
+                    "404": {
+                        "description": "Compte non trouvé"
+                    },
+                    "422": {
+                        "description": "Erreur de validation"
                     }
                 }
             }
