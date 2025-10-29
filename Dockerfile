@@ -1,5 +1,5 @@
-# Utiliser PHP 8.2 avec FPM et extensions nécessaires
-FROM php:8.2-fpm-alpine
+# Utiliser PHP 8.3 avec FPM et extensions nécessaires
+FROM php:8.3-fpm-alpine
 
 # Installer les dépendances système
 RUN apk add --no-cache \
