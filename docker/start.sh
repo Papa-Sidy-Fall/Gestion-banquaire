@@ -7,10 +7,24 @@ echo "🚀 Starting Laravel application..."
 
 # Wait for database to be ready
 echo "⏳ Waiting for database..."
-while ! pg_isready -h ${DB_HOST:-db} -p ${DB_PORT:-5432} -U ${DB_USERNAME:-laravel} >/dev/null 2>&1; do
-    echo "Database not ready, waiting..."
-    sleep 2
-done
+if [ -n "$DATABASE_URL" ]; then
+    # Extract database connection details from DATABASE_URL
+    DB_HOST=$(echo $DATABASE_URL | sed -n 's|.*@\([^:]*\):.*|\1|p')
+    DB_PORT=$(echo $DATABASE_URL | sed -n 's|.*:\([0-9]*\)/.*|\1|p')
+    DB_USERNAME=$(echo $DATABASE_URL | sed -n 's|.*://\([^:]*\):.*|\1|p')
+    DB_PASSWORD=$(echo $DATABASE_URL | sed -n 's|.*:\([^@]*\)@.*|\1|p')
+
+    while ! pg_isready -h $DB_HOST -p $DB_PORT -U $DB_USERNAME >/dev/null 2>&1; do
+        echo "Database not ready, waiting..."
+        sleep 2
+    done
+else
+    # Fallback for local development
+    while ! pg_isready -h ${DB_HOST:-db} -p ${DB_PORT:-5432} -U ${DB_USERNAME:-laravel} >/dev/null 2>&1; do
+        echo "Database not ready, waiting..."
+        sleep 2
+    done
+fi
 echo "✅ Database is ready!"
 
 # Generate application key if not set
