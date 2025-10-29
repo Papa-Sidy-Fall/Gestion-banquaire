@@ -7,36 +7,37 @@ echo "🚀 Starting Laravel application..."
 
 # Wait for database to be ready
 echo "⏳ Waiting for database..."
-if [ -n "$DATABASE_URL" ]; then
-    echo "DATABASE_URL found: ${DATABASE_URL:0:30}..."
+echo "Environment variables:"
+echo "DATABASE_URL: ${DATABASE_URL:0:30}..."
+echo "DB_HOST: $DB_HOST"
+echo "DB_PORT: $DB_PORT"
+echo "DB_USERNAME: $DB_USERNAME"
 
-    # Extract database connection details from DATABASE_URL
-    # Format: postgresql://username:password@host:port/database
-    DB_HOST=$(echo $DATABASE_URL | sed -n 's|.*@\([^:]*\):.*|\1|p')
-    DB_PORT=$(echo $DATABASE_URL | sed -n 's|.*:\([0-9]*\)/.*|\1|p')
-    DB_USERNAME=$(echo $DATABASE_URL | sed -n 's|.*://\([^:]*\):.*|\1|p')
-    DB_PASSWORD=$(echo $DATABASE_URL | sed -n 's|.*:\([^@]*\)@.*|\1|p')
+# Try to connect for max 120 seconds (longer timeout)
+for i in {1..60}; do
+    if [ -n "$DATABASE_URL" ]; then
+        # Extract database connection details from DATABASE_URL
+        # Format: postgresql://username:password@host:port/database
+        DB_HOST=$(echo $DATABASE_URL | sed -n 's|.*@\([^:]*\):.*|\1|p')
+        DB_PORT=$(echo $DATABASE_URL | sed -n 's|.*:\([0-9]*\)/.*|\1|p')
+        DB_USERNAME=$(echo $DATABASE_URL | sed -n 's|.*://\([^:]*\):.*|\1|p')
+        DB_PASSWORD=$(echo $DATABASE_URL | sed -n 's|.*:\([^@]*\)@.*|\1|p')
 
-    echo "Parsed connection: host=$DB_HOST, port=$DB_PORT, user=$DB_USERNAME"
-
-    # Try to connect for max 60 seconds
-    for i in {1..30}; do
         if pg_isready -h $DB_HOST -p $DB_PORT -U $DB_USERNAME -d postgres >/dev/null 2>&1; then
             echo "✅ Database is ready!"
             break
         fi
-        echo "Database not ready, attempt $i/30, waiting..."
-        sleep 2
+    fi
 
-        if [ $i -eq 30 ]; then
-            echo "❌ Database connection timeout after 60 seconds"
-            exit 1
-        fi
-    done
-else
-    echo "❌ No DATABASE_URL found"
-    exit 1
-fi
+    echo "Database not ready, attempt $i/60, waiting..."
+    sleep 2
+
+    if [ $i -eq 60 ]; then
+        echo "❌ Database connection timeout after 120 seconds"
+        echo "Final DATABASE_URL: $DATABASE_URL"
+        exit 1
+    fi
+done
 
 # Generate application key if not set
 if [ -z "$APP_KEY" ] || [ "$APP_KEY" = "base64:" ]; then
