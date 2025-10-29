@@ -38,6 +38,11 @@ while [ $i -le 60 ]; do
         DB_HOST=$(echo $DATABASE_URL | sed -n 's|.*@\([^:]*\):.*|\1|p')
         DB_PORT=$(echo $DATABASE_URL | sed -n 's|.*:\([0-9]*\)/.*|\1|p')
 
+        # Fallback for port if not found (PostgreSQL default)
+        if [ -z "$DB_PORT" ]; then
+            DB_PORT="5432"
+        fi
+
         echo "Parsed values - User: $DB_USERNAME, Host: $DB_HOST, Port: $DB_PORT"
 
         if pg_isready -h $DB_HOST -p $DB_PORT -U $DB_USERNAME -d postgres >/dev/null 2>&1; then
