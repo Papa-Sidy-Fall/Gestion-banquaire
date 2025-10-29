@@ -31,10 +31,7 @@ WORKDIR /var/www/html
 COPY composer.json composer.lock package.json package-lock.json ./
 
 # Installer les dépendances PHP
-RUN composer install --no-dev --optimize-autoloader --no-interaction
-
-# Installer les dépendances Node.js
-RUN npm ci && npm run build
+RUN composer install --no-dev --optimize-autoloader --no-interaction --no-scripts
 
 # Copier le reste du code
 COPY . .
