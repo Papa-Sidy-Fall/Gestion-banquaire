@@ -33,8 +33,6 @@ services:
           type: pserv
           name: postgres
           property: connectionString
-    dependsOn:
-      - postgres
 
 # Environment groups for different stages
 environments:
