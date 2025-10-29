@@ -1,0 +1,50 @@
+services:
+  - type: web
+    name: laravel-api
+    runtime: docker
+    buildCommand: "docker build -t laravel-api ."
+    startCommand: "docker run -p $PORT:80 laravel-api"
+    healthCheckPath: /health
+    envVars:
+      - key: APP_ENV
+        value: production
+      - key: APP_DEBUG
+        value: false
+      - key: APP_KEY
+        generateValue: true
+      - key: DB_CONNECTION
+        value: pgsql
+      - key: CACHE_STORE
+        value: database
+      - key: QUEUE_CONNECTION
+        value: database
+      - key: SESSION_DRIVER
+        value: database
+      - key: LOG_LEVEL
+        value: error
+      - key: L5_SWAGGER_GENERATE_ALWAYS
+        value: false
+    # Database (PostgreSQL)
+  - type: pserv
+    name: postgres
+    runtime: docker
+    dockerfilePath: ./docker/postgres.Dockerfile
+    envVars:
+      - key: POSTGRES_DB
+        value: laravel
+      - key: POSTGRES_USER
+        value: laravel
+      - key: POSTGRES_PASSWORD
+        generateValue: true
+    disk:
+      name: postgres-data
+      mountPath: /var/lib/postgresql/data
+      sizeGB: 10
+
+# Environment groups for different stages
+environments:
+  - name: production
+    source:
+      type: git
+      repo: your-repo-url
+      branch: main

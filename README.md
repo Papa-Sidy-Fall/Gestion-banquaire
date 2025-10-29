@@ -1,66 +1,235 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# API Banque - Système de Gestion de Comptes
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Une API REST complète pour la gestion de comptes bancaires avec archivage automatique, développée avec Laravel 11.
 
-## About Laravel
+## 🚀 Fonctionnalités
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+### ✅ Gestion des Comptes
+- **Création de comptes** avec validation des données client
+- **Lister les comptes** avec filtres et pagination
+- **Mise à jour des informations** client et compte
+- **Blocage de comptes** avec durée déterminée
+- **Archivage automatique** des comptes bloqués expirés
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+### ✅ Sécurité et Authentification
+- **Laravel Passport** pour l'authentification OAuth2
+- **Rate limiting** pour protection contre les abus
+- **Middleware de logging** pour traçabilité
+- **Validation stricte** des données
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+### ✅ Automatisation
+- **Jobs programmés** pour archivage quotidien
+- **Déblocage automatique** des comptes expirés
+- **Notifications** par email et SMS
+- **Health checks** pour monitoring
 
-## Learning Laravel
+### ✅ Documentation
+- **Swagger/OpenAPI** documentation complète
+- **Tests automatisés** des endpoints
+- **Logs détaillés** pour debugging
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+## 🐳 Déploiement Docker
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+### Prérequis
+- Docker & Docker Compose
+- Git
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+### Installation en Développement
 
-## Laravel Sponsors
+```bash
+# Cloner le repository
+git clone <repository-url>
+cd api-banque
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+# Copier le fichier d'environnement
+cp .env.example .env
 
-### Premium Partners
+# Générer la clé d'application
+php artisan key:generate
 
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[WebReinvent](https://webreinvent.com/)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel/)**
-- **[Cyber-Duck](https://cyber-duck.co.uk)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Jump24](https://jump24.co.uk)**
-- **[Redberry](https://redberry.international/laravel/)**
-- **[Active Logic](https://activelogic.com)**
-- **[byte5](https://byte5.de)**
-- **[OP.GG](https://op.gg)**
+# Démarrer les services
+docker-compose up -d
 
-## Contributing
+# Accéder à l'application
+# API: http://localhost:8000
+# Swagger: http://localhost:8000/api/documentation
+```
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+### Variables d'Environnement
 
-## Code of Conduct
+```env
+APP_ENV=production
+APP_KEY=base64:your-generated-key
+APP_DEBUG=false
+APP_URL=https://your-app-name.onrender.com
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+DB_CONNECTION=pgsql
+DB_HOST=your-postgres-host
+DB_DATABASE=laravel
+DB_USERNAME=laravel
+DB_PASSWORD=your-password
 
-## Security Vulnerabilities
+CACHE_STORE=database
+QUEUE_CONNECTION=database
+SESSION_DRIVER=database
+```
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+## 🚀 Déploiement sur Render
 
-## License
+### 1. Configuration Render
+```yaml
+# render.yaml
+services:
+  - type: web
+    name: laravel-api
+    runtime: docker
+    buildCommand: "docker build -t laravel-api ."
+    startCommand: "docker run -p $PORT:80 laravel-api"
+    healthCheckPath: /health
+```
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+### 2. Variables d'Environnement sur Render
+- `APP_ENV=production`
+- `APP_KEY` (généré automatiquement)
+- `DATABASE_URL` (fourni par Render PostgreSQL)
+- `APP_URL` (URL de votre service Render)
+
+### 3. Déploiement
+```bash
+# Pousser sur votre repository
+git add .
+git commit -m "Ready for production"
+git push origin main
+
+# Render détectera automatiquement render.yaml et déploiera
+```
+
+## 📚 API Endpoints
+
+### Comptes
+- `GET /api/v1/comptes` - Lister les comptes (avec filtres)
+- `POST /api/v1/comptes` - Créer un compte
+- `GET /api/v1/comptes/{id}` - Afficher un compte
+- `PATCH /api/v1/comptes/{id}` - Mettre à jour un compte
+- `DELETE /api/v1/comptes/{id}` - Supprimer un compte
+- `POST /api/v1/comptes/{id}/bloquer` - Bloquer un compte
+
+### Authentification
+- `POST /oauth/token` - Obtenir un token d'accès
+
+### Documentation
+- `GET /api/documentation` - Interface Swagger
+
+### Monitoring
+- `GET /health` - Health check
+
+## 🧪 Tests
+
+```bash
+# Exécuter les tests
+php artisan test
+
+# Tests avec couverture
+php artisan test --coverage
+```
+
+## 📊 Monitoring
+
+### Health Check
+L'endpoint `/health` retourne l'état des services :
+```json
+{
+  "status": "healthy",
+  "timestamp": "2025-10-29T15:56:00Z",
+  "services": {
+    "database": {"status": "healthy"},
+    "cache": {"status": "healthy"},
+    "storage": {"status": "healthy"}
+  }
+}
+```
+
+### Logs
+```bash
+# Logs Laravel
+tail -f storage/logs/laravel.log
+
+# Logs Docker
+docker-compose logs -f app
+```
+
+## 🔧 Maintenance
+
+### Jobs Programmés
+```bash
+# Exécuter manuellement les jobs
+php artisan archive:expired-blocked-accounts
+php artisan unblock:expired-accounts
+
+# Lister les jobs programmés
+php artisan schedule:list
+```
+
+### Optimisation
+```bash
+# Cache de configuration
+php artisan config:cache
+php artisan route:cache
+php artisan view:cache
+
+# Clear cache
+php artisan cache:clear
+php artisan config:clear
+php artisan route:clear
+```
+
+## 🏗️ Architecture
+
+```
+├── app/
+│   ├── Console/Commands/     # Commandes Artisan
+│   ├── Events/              # Événements
+│   ├── Exceptions/          # Exceptions personnalisées
+│   ├── Http/
+│   │   ├── Controllers/     # Contrôleurs API
+│   │   ├── Middleware/      # Middlewares personnalisés
+│   │   ├── Requests/        # Form requests
+│   │   └── Resources/       # API Resources
+│   ├── Jobs/                # Jobs en file d'attente
+│   ├── Listeners/           # Écouteurs d'événements
+│   ├── Models/              # Modèles Eloquent
+│   ├── Observers/           # Observers de modèles
+│   ├── Rules/               # Règles de validation
+│   └── Traits/              # Traits réutilisables
+├── database/
+│   ├── factories/           # Factories pour tests
+│   ├── migrations/          # Migrations base de données
+│   └── seeders/             # Seeders
+├── docker/                  # Configuration Docker
+├── routes/
+│   ├── api.php             # Routes API
+│   └── web.php             # Routes web
+└── tests/                  # Tests automatisés
+```
+
+## 🤝 Contribution
+
+1. Fork le projet
+2. Créer une branche feature (`git checkout -b feature/AmazingFeature`)
+3. Commit les changements (`git commit -m 'Add some AmazingFeature'`)
+4. Push vers la branche (`git push origin feature/AmazingFeature`)
+5. Ouvrir une Pull Request
+
+## 📝 Licence
+
+Ce projet est sous licence MIT - voir le fichier [LICENSE](LICENSE) pour plus de détails.
+
+## 📞 Support
+
+Pour toute question ou problème :
+- Ouvrir une issue sur GitHub
+- Contacter l'équipe de développement
+
+---
+
+**Développé avec ❤️ par l'équipe API Banque**
