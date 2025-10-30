@@ -56,6 +56,14 @@ while [ $i -le 60 ]; do
     if PGPASSWORD=$DB_PASSWORD psql -h $DB_HOST -p $DB_PORT -U $DB_USERNAME -d $DB_DATABASE -c "SELECT 1;" >/dev/null 2>&1; then
         echo "✅ Database is ready!"
         break
+    else
+        echo "Connection failed. Checking if database exists..."
+        # Try to connect to postgres database to check if server is up
+        if PGPASSWORD=$DB_PASSWORD psql -h $DB_HOST -p $DB_PORT -U $DB_USERNAME -d postgres -c "SELECT version();" >/dev/null 2>&1; then
+            echo "PostgreSQL server is up, but database '$DB_DATABASE' may not exist or credentials are wrong."
+        else
+            echo "Cannot connect to PostgreSQL server at all."
+        fi
     fi
 
     echo "Database not ready, attempt $i/60, waiting..."
