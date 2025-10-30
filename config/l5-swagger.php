@@ -6,16 +6,6 @@ return [
         'default' => [
             'api' => [
                 'title' => 'API Gestion Bancaire v1.0',
-                'servers' => [
-                    [
-                        'url' => 'http://localhost:8000',
-                        'description' => 'Serveur de développement local'
-                    ],
-                    [
-                        'url' => 'https://gestion-banquaire.onrender.com',
-                        'description' => 'Serveur de production'
-                    ]
-                ],
             ],
 
             'routes' => [
