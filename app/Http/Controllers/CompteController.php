@@ -22,7 +22,12 @@ use Illuminate\Support\Facades\DB;
  *
  * @OA\Server(
  *     url="http://localhost:8000/api/v1",
- *     description="Serveur API"
+ *     description="Serveur de développement local"
+ * )
+ *
+ * @OA\Server(
+ *     url="https://gestion-banquaire.onrender.com/api/v1",
+ *     description="Serveur de production"
  * )
  *
  * @OA\Schema(
