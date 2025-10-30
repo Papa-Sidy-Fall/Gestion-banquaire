@@ -5,20 +5,6 @@ set -e
 
 echo "🚀 Starting Laravel application..."
 
-# Create .env file if it doesn't exist
-if [ ! -f .env ]; then
-    echo "📄 Creating .env file from .env.example..."
-    cp .env.example .env || echo "Warning: .env.example not found, creating basic .env"
-
-    # Set production environment variables
-    echo "APP_ENV=production" >> .env
-    echo "APP_DEBUG=false" >> .env
-    echo "LOG_LEVEL=error" >> .env
-    echo "CACHE_STORE=database" >> .env
-    echo "SESSION_DRIVER=database" >> .env
-    echo "QUEUE_CONNECTION=database" >> .env
-fi
-
 # Extract database connection details from DATABASE_URL
 if [ -n "$DATABASE_URL" ]; then
     echo "Raw URL parsing:"
@@ -47,6 +33,19 @@ if [ -n "$DATABASE_URL" ]; then
     export DB_PASSWORD=$DB_PASSWORD
 
     echo "Database connection variables exported."
+fi
+
+# Create .env file if it doesn't exist and APP_ENV is not already set (e.g., by Render)
+if [ ! -f .env ] && [ -z "$APP_ENV" ]; then
+    echo "📄 Creating .env file from .env.example..."
+    cp .env.example .env || echo "Warning: .env.example not found, creating basic .env"
+    # Add basic production settings if not already set by environment variables
+    echo "APP_ENV=production" >> .env
+    echo "APP_DEBUG=false" >> .env
+    echo "LOG_LEVEL=error" >> .env
+    echo "CACHE_STORE=database" >> .env
+    echo "SESSION_DRIVER=database" >> .env
+    echo "QUEUE_CONNECTION=database" >> .env
 fi
 
 # Wait for database to be ready
