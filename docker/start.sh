@@ -53,16 +53,21 @@ echo "⏳ Waiting for database..."
 # Try to connect for max 120 seconds (longer timeout)
 i=1
 while [ $i -le 60 ]; do
-    if PGPASSWORD=$DB_PASSWORD psql -h $DB_HOST -p $DB_PORT -U $DB_USERNAME -d $DB_DATABASE -c "SELECT 1;" >/dev/null 2>&1; then
+    # Test with SSL required (common for cloud databases)
+    if PGPASSWORD=$DB_PASSWORD psql "host=$DB_HOST port=$DB_PORT user=$DB_USERNAME dbname=$DB_DATABASE sslmode=require" -c "SELECT 1;" >/dev/null 2>&1; then
         echo "✅ Database is ready!"
         break
     else
         echo "Connection failed. Checking if database exists..."
         # Try to connect to postgres database to check if server is up
-        if PGPASSWORD=$DB_PASSWORD psql -h $DB_HOST -p $DB_PORT -U $DB_USERNAME -d postgres -c "SELECT version();" >/dev/null 2>&1; then
+        if PGPASSWORD=$DB_PASSWORD psql "host=$DB_HOST port=$DB_PORT user=$DB_USERNAME dbname=postgres sslmode=require" -c "SELECT version();" >/dev/null 2>&1; then
             echo "PostgreSQL server is up, but database '$DB_DATABASE' may not exist or credentials are wrong."
         else
             echo "Cannot connect to PostgreSQL server at all."
+            # Additional network diagnostics
+            echo "Network diagnostics:"
+            ping -c 2 $DB_HOST || echo "Ping failed"
+            nc -zv $DB_HOST $DB_PORT || echo "Port connection failed"
         fi
     fi
 
