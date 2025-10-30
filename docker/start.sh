@@ -19,37 +19,44 @@ if [ ! -f .env ]; then
     echo "QUEUE_CONNECTION=database" >> .env
 fi
 
+# Extract database connection details from DATABASE_URL
+if [ -n "$DATABASE_URL" ]; then
+    echo "Raw URL parsing:"
+    echo "  URL: $DATABASE_URL"
+    DB_CONNECTION=$(echo $DATABASE_URL | sed -n 's|^\([^:]*\):.*|\1|p')
+    DB_USERNAME=$(echo $DATABASE_URL | sed -n 's|.*://\([^:]*\):.*|\1|p')
+    DB_PASSWORD=$(echo $DATABASE_URL | sed -n 's|.*:\([^@]*\)@.*|\1|p')
+    DB_HOST=$(echo $DATABASE_URL | sed -n 's|.*@\([^:/]*\).*|\1|p')
+    DB_PORT=$(echo $DATABASE_URL | sed -n 's|.*:\([0-9]*\)/.*|\1|p')
+    DB_DATABASE=$(echo $DATABASE_URL | sed -n 's|.*/\([^?]*\).*|\1|p')
+
+    # Default port for PostgreSQL if not specified in URL
+    if [ -z "$DB_PORT" ]; then
+        DB_PORT="5432"
+    fi
+
+    echo "  Extracted - User: '$DB_USERNAME', Password: '${DB_PASSWORD:0:5}...', Host: '$DB_HOST', Port: '$DB_PORT', Database: '$DB_DATABASE'"
+    echo "Parsed values - User: $DB_USERNAME, Host: $DB_HOST, Port: $DB_PORT, Database: $DB_DATABASE"
+
+    # Set environment variables for Laravel
+    export DB_CONNECTION=$DB_CONNECTION
+    export DB_HOST=$DB_HOST
+    export DB_PORT=$DB_PORT
+    export DB_DATABASE=$DB_DATABASE
+    export DB_USERNAME=$DB_USERNAME
+    export DB_PASSWORD=$DB_PASSWORD
+
+    echo "Database connection variables exported."
+fi
+
 # Wait for database to be ready
 echo "⏳ Waiting for database..."
-echo "Environment variables:"
-echo "DATABASE_URL: ${DATABASE_URL:0:50}..."
-echo "DB_HOST: $DB_HOST"
-echo "DB_PORT: $DB_PORT"
-echo "DB_USERNAME: $DB_USERNAME"
-
 # Try to connect for max 120 seconds (longer timeout)
 i=1
 while [ $i -le 60 ]; do
-    if [ -n "$DATABASE_URL" ]; then
-        # Extract database connection details from DATABASE_URL
-        # Format: postgresql://username:password@host/database (no port in Render URLs)
-        DB_USERNAME=$(echo $DATABASE_URL | sed -n 's|.*://\([^:]*\):.*|\1|p')
-        DB_PASSWORD=$(echo $DATABASE_URL | sed -n 's|.*:\([^@]*\)@.*|\1|p')
-        DB_HOST=$(echo $DATABASE_URL | sed -n 's|.*@\([^/]*\)/.*|\1|p')
-        DB_PORT="5432"  # Always use 5432 for PostgreSQL
-
-        # Debug: Show what we extracted
-        echo "Raw URL parsing:"
-        echo "  URL: $DATABASE_URL"
-        echo "  Extracted - User: '$DB_USERNAME', Password: '${DB_PASSWORD:0:5}...', Host: '$DB_HOST', Port: '$DB_PORT'"
-
-        echo "Parsed values - User: $DB_USERNAME, Host: $DB_HOST, Port: $DB_PORT"
-
-        # Try to connect with extracted credentials
-        if PGPASSWORD=$DB_PASSWORD psql -h $DB_HOST -p $DB_PORT -U $DB_USERNAME -d laravel -c "SELECT 1;" >/dev/null 2>&1; then
-            echo "✅ Database is ready!"
-            break
-        fi
+    if PGPASSWORD=$DB_PASSWORD psql -h $DB_HOST -p $DB_PORT -U $DB_USERNAME -d $DB_DATABASE -c "SELECT 1;" >/dev/null 2>&1; then
+        echo "✅ Database is ready!"
+        break
     fi
 
     echo "Database not ready, attempt $i/60, waiting..."
@@ -58,8 +65,7 @@ while [ $i -le 60 ]; do
 
     if [ $i -gt 60 ]; then
         echo "❌ Database connection timeout after 120 seconds"
-        echo "Final DATABASE_URL: $DATABASE_URL"
-        echo "Parsed - User: $DB_USERNAME, Host: $DB_HOST, Port: $DB_PORT"
+        echo "Final DB_HOST: $DB_HOST, DB_PORT: $DB_PORT, DB_USERNAME: $DB_USERNAME, DB_DATABASE: $DB_DATABASE"
         exit 1
     fi
 done
@@ -69,6 +75,10 @@ if [ -z "$APP_KEY" ] || [ "$APP_KEY" = "base64:" ]; then
     echo "🔑 Generating application key..."
     php artisan key:generate --force
 fi
+
+# Clear config cache before running migrations to ensure new DB vars are used
+echo "⚡ Clearing config cache..."
+php artisan config:clear
 
 # Run database migrations
 echo "🗄️ Running database migrations..."
