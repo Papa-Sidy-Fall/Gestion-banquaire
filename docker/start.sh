@@ -45,7 +45,8 @@ while [ $i -le 60 ]; do
 
         echo "Parsed values - User: $DB_USERNAME, Host: $DB_HOST, Port: $DB_PORT"
 
-        if pg_isready -h $DB_HOST -p $DB_PORT -U $DB_USERNAME -d laravel >/dev/null 2>&1; then
+        # Try to connect with extracted credentials
+        if PGPASSWORD=$DB_PASSWORD psql -h $DB_HOST -p $DB_PORT -U $DB_USERNAME -d laravel -c "SELECT 1;" >/dev/null 2>&1; then
             echo "✅ Database is ready!"
             break
         fi
