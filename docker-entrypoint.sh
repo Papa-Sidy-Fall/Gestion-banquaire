@@ -8,6 +8,16 @@ while ! pg_isready -h $DB_HOST -p $DB_PORT -U $DB_USERNAME; do
 done
 
 echo "Database is up - executing migrations"
+
+# Clear and cache configuration, routes, and views
+php artisan config:clear
+php artisan cache:clear
+php artisan route:clear
+php artisan view:clear
+php artisan config:cache
+php artisan route:cache
+php artisan view:cache
+
 php artisan migrate --force
 
 echo "Starting Laravel application..."
