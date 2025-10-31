@@ -24,7 +24,7 @@ class HealthController extends Controller
                 'status' => 'healthy',
                 'response_time' => now()->diffInMilliseconds(now())
             ];
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             $health['services']['database'] = [
                 'status' => 'unhealthy',
                 'error' => $e->getMessage()
