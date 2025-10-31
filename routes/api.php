@@ -14,6 +14,22 @@ use App\Http\Middleware\RateLimitMiddleware;
 
 Route::apiResource('clients', ClientController::class);
 
+// Route de debug temporaire
+Route::get('/debug-env', function () {
+    return response()->json([
+        'env_variables' => [
+            'DB_CONNECTION' => env('DB_CONNECTION'),
+            'DB_HOST' => env('DB_HOST'),
+            'DB_PORT' => env('DB_PORT'),
+            'DB_DATABASE' => env('DB_DATABASE'),
+            'DB_USERNAME' => env('DB_USERNAME'),
+            'DB_PASSWORD' => env('DB_PASSWORD') ? '***SET***' : 'NOT_SET',
+        ],
+        'config_database' => config('database.connections.pgsql'),
+        'timestamp' => now()
+    ]);
+});
+
 // Groupement par version v1
 Route::prefix('v1')->group(function () {
     Route::middleware([RateLimitMiddleware::class])->group(function () {
