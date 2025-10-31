@@ -10,12 +10,12 @@ COPY composer.json composer.lock ./
 RUN composer install --no-dev --optimize-autoloader --no-interaction --prefer-dist --no-scripts
 
 # Étape 2: Image finale pour l'application
-FROM devilbox/php-fpm:8.3-work-0.157
+FROM php:8.3-fpm-alpine
 
 # Installer les extensions PHP nécessaires
-RUN apk add --no-cache postgresql-dev \
-    && docker-php-ext-install pdo pdo_pgsql \
-    && docker-php-ext-enable pdo_pgsql
+RUN apk add --no-cache postgresql-dev postgresql-libs \
+    && docker-php-ext-install pdo pdo_pgsql pgsql \
+    && docker-php-ext-enable pdo_pgsql pgsql
 
 # Créer un utilisateur non-root
 RUN addgroup -g 1000 laravel && adduser -G laravel -g laravel -s /bin/sh -D laravel
