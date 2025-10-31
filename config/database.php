@@ -65,7 +65,7 @@ return [
 
         'pgsql' => [
             'driver' => 'pgsql',
-            'url' => env('DATABASE_URL'),
+            'url' => 'postgresql://laravel:IjueOIF5lYpThaMxAt2ZhVkl5C8RofVT@dpg-d417dijipnbc73as7e4g-a/laravel_0q73',
             // 'host' => env('DB_HOST', '127.0.0.1'),
             // 'port' => env('DB_PORT', '5432'),
             // 'database' => env('DB_DATABASE', 'forge'),
