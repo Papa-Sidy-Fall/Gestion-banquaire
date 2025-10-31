@@ -12,6 +12,7 @@ use App\Traits\ApiResponseTrait;
 use Illuminate\Http\Request;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 /**
  * @OA\Info(
@@ -137,10 +138,16 @@ class CompteController extends Controller
      */
     public function index(Request $request)
     {
+        Log::info('Début de la méthode index');
+
         $user = $request->user();
+        Log::info('User récupéré', ['user' => $user]);
+
         $isAdmin = $user && $user->role === 'admin'; // Assumer un champ role
+        Log::info('isAdmin', ['isAdmin' => $isAdmin]);
 
         $query = Compte::with('client')->whereNotNull('id'); // Base query
+        Log::info('Query de base créée');
 
         // Permissions
         if (!$isAdmin && $user) {
