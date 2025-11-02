@@ -6,7 +6,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ClientController;
 use App\Http\Controllers\CompteController;
 
-// Test minimal pour diagnostiquer l'erreur 500
+// Test minimal pour diagnostiquer l'erreur  500
 Route::get('/test-minimal', function () {
     return response()->json(['test' => 'ok', 'timestamp' => now()]);
 });
