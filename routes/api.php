@@ -30,6 +30,11 @@ Route::get('/debug-env', function () {
     ]);
 });
 
+// Test minimal
+Route::get('/test-minimal', function () {
+    return response()->json(['test' => 'ok', 'timestamp' => now()]);
+});
+
 // Groupement par version v1
 Route::prefix('v1')->group(function () {
     Route::middleware([RateLimitMiddleware::class])->group(function () {
