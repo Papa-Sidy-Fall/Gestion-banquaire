@@ -11,6 +11,11 @@ Route::get('/test-minimal', function () {
     return response()->json(['test' => 'ok', 'timestamp' => now()]);
 });
 
+// Test super simple
+Route::get('/super-simple', function () {
+    return 'OK';
+});
+
 // Routes de base sans authentification temporairement
 Route::apiResource('clients', ClientController::class);
 
