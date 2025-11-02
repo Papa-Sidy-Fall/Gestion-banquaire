@@ -70,5 +70,8 @@ USER laravel
 # Exposer le port 8000
 EXPOSE 8000
 
-# Commande par défaut
+# Utiliser notre script d'entrée pour initialiser l'application
+ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]
+
+# Commande par défaut (passée en argument au script d'entrée)
 CMD ["php", "artisan", "serve", "--host=0.0.0.0", "--port=8000"]
