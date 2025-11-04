@@ -65,17 +65,17 @@ return [
 
         'pgsql' => [
             'driver' => 'pgsql',
-            'url' => 'postgresql://gestion_banquaire_db_user:qJecYcPfDVTnoD7tCV2atTULcVG30fzE@dpg-d42ci924d50c73et8ucg-a.oregon-postgres.render.com/gestion_banquaire_db',
-            // 'host' => env('DB_HOST', '127.0.0.1'),
-            // 'port' => env('DB_PORT', '5432'),
-            // 'database' => env('DB_DATABASE', 'forge'),
-            // 'username' => env('DB_USERNAME', 'forge'),
-            // 'password' => env('DB_PASSWORD', ''),
-            // 'charset' => 'utf8',
-            // 'prefix' => '',
-            // 'prefix_indexes' => true,
-            // 'search_path' => 'public',
-            // 'sslmode' => env('DB_SSLMODE', 'require'), // Force SSL for production
+            'url' => env('DATABASE_URL'),
+            'host' => env('DB_HOST', '127.0.0.1'),
+            'port' => env('DB_PORT', '5432'),
+            'database' => env('DB_DATABASE', 'forge'),
+            'username' => env('DB_USERNAME', 'forge'),
+            'password' => env('DB_PASSWORD', ''),
+            'charset' => 'utf8',
+            'prefix' => '',
+            'prefix_indexes' => true,
+            'search_path' => 'public',
+            'sslmode' => env('DB_SSLMODE', 'require'),
         ],
 
         'sqlsrv' => [
